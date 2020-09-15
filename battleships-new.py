@@ -42,7 +42,7 @@ def draw_battleshipContainer(stdscr, width):
 
     for i in range(len(battleships[1])):
         row1 = battleships[1][i]
-        stdscr.addstr(6+i*2, 14, row1)
+        stdscr.addstr(6+i, 14, row1)
 
     curses.echo()
 
@@ -52,7 +52,7 @@ def draw(stdscr):
     k = 0
     cursor_x = 23
     cursor_y = 6
-    cursorText = ["", 0]
+    cursorText = [-1, -1, -1]
     minMaxX = [14, 41]
     minMaxY = [6, 15]
 
@@ -160,16 +160,30 @@ def draw(stdscr):
 
         # Selection
         if k == ord(' '):
-            for i in range(5):
-                if cursor_y == 6 and cursor_x == 14+i:
-                    cursorText = ["C C C C C", 0-i*2]
-                    cursor_y = 6
-                    cursor_x = 23+i*2
-                    minMaxX[0] = 23+i*2
-                    minMaxX[1] = 33+i*2
+
+            for yRow in range(5):
+                if cursor_y == 6+yRow and cursor_x >= 14 and cursor_x <= 19:
+                    length = len(battleships[1][yRow])
+                    for i in range(length):
+                        if cursor_y == 6+yRow and cursor_x == 14+i:
+                            cursorText = [yRow, 0-i, 0]
+                            cursor_y = 6+yRow
+                            cursor_x = 23+i*2
+
+        if cursorText[0] != -1:
+            if k == ord('r'):
+                cursorText[2] ^= 1
+
+            minMaxX[0] = 23 + (cursorText[1]*2)
+            minMaxX[1] = 41 - (8+cursorText[1]*2)
 
         # Move cursor
-        stdscr.addstr(cursor_y, cursor_x+cursorText[1], cursorText[0])
+        if cursorText[2] == 0:
+            stdscr.addstr(cursor_y, cursor_x+(cursorText[1]*2), " ".join(battleships[1][cursorText[0]]))
+        elif cursorText[2] == 1:
+            for i in range(len(battleships[1][cursorText[0]])):
+                stdscr.addstr(cursor_y+i+cursorText[1], cursor_x, battleships[0][0])
+
         stdscr.move(cursor_y, cursor_x)
 
         # Refresh the screen
