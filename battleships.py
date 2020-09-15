@@ -30,10 +30,10 @@ def boardDisplay(playerIndex):
     """
 
 def clearOutput():
-    if os.name == 'posix':
-        os.system("clear")
-    elif os.name == 'nt':
+    if os.name == 'nt':
         os.system("cls")
+    else:
+        os.system("clear")
 
 def inputCoordinates():
     
