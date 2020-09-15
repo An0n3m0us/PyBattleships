@@ -6,7 +6,7 @@ board = [["----------", "----------", "----------", "----------", "----------", 
 rows = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 columns = {"A": 0, "B": 1, "C": 2, "D": 3, "E": 4, "F": 5, "G": 6, "H": 7, "I": 8, "J": 9}
 
-battleships = [["C", "B", "D", "S", "P"], ["[C]arrier(5)", "[B]attleship(4)", "[D]estroyer(3)", "[S]ubmarine(3)", "[P]atrol Boat(2)"]]
+battleships = [["C", "B", "D", "S", "P"], ["CCCCC", "BBBB", "DDD", "SSS", "PP"]]
 
 def centerString(width, string):
     return int((width // 2) - (len(string) // 2) - len(string) % 2)
@@ -42,12 +42,20 @@ def draw_battleshipContainer(stdscr, width):
 
     for i in range(len(battleships[1])):
         row1 = battleships[1][i]
-        stdscr.addstr(6+i*2, 5, row1)
+        stdscr.addstr(6+i*2, 14, row1)
 
     curses.echo()
 
 # https://gist.github.com/claymcleod/b670285f334acd56ad1c
 def draw(stdscr):
+
+    k = 0
+    cursor_x = 23
+    cursor_y = 6
+    cursorText = ["", 0]
+    minMaxX = [14, 41]
+    minMaxY = [6, 15]
+
     # Clear and refresh the screen for a blank canvas
     stdscr.clear()
     stdscr.refresh()
@@ -57,17 +65,37 @@ def draw(stdscr):
     curses.init_pair(1, curses.COLOR_GREEN, curses.COLOR_BLACK)
 
     while True:
-
         # Initialization
         stdscr.clear()
         height, width = stdscr.getmaxyx()
+
+        if k == curses.KEY_DOWN:
+            cursor_y = cursor_y + 1
+        elif k == curses.KEY_UP:
+            cursor_y = cursor_y - 1
+        elif k == curses.KEY_RIGHT:
+            if cursor_x > 20:
+                cursor_x = cursor_x + 2
+            else:
+                cursor_x = cursor_x + 1
+        elif k == curses.KEY_LEFT:
+            if cursor_x > 20:
+                cursor_x = cursor_x - 2
+            else:
+                cursor_x = cursor_x - 1
+
+        cursor_x = max(minMaxX[0], cursor_x)
+        cursor_x = min(minMaxX[1], cursor_x)
+
+        cursor_y = max(minMaxY[0], cursor_y)
+        cursor_y = min(minMaxY[1], cursor_y)
 
         # Draw board
         draw_board(stdscr, width)
         draw_battleshipContainer(stdscr, width)
 
         # Input
-        query = stdscr.getstr(22, 2, 4)
+        """query = stdscr.getstr(22, 2, 4)
         query = list(str(query)[2:-1])
 
         if (len(query) == 4 and query[0].upper() in battleships[0] and query[1].upper() in columns and query[2].isdigit() and query[3].lower() in ["n", "e", "s", "w"]):
@@ -124,14 +152,30 @@ def draw(stdscr):
                         board[0][row] = ''.join(posColumn)
                     # Remove ship
                     battleships[0].pop(ship[1])
-                    battleships[1].pop(ship[1])
+                    battleships[1].pop(ship[1])"""
 
         # Turning off attributes for title
-        stdscr.attron(curses.color_pair(1))
+        stdscr.attroff(curses.color_pair(1))
         stdscr.attroff(curses.A_BOLD)
+
+        # Selection
+        if k == ord(' '):
+            for i in range(5):
+                if cursor_y == 6 and cursor_x == 14+i:
+                    cursorText = ["C C C C C", 0-i*2]
+                    cursor_y = 6
+                    cursor_x = 23+i*2
+                    minMaxX[0] = 23+i*2
+                    minMaxX[1] = 33+i*2
+
+        # Move cursor
+        stdscr.addstr(cursor_y, cursor_x+cursorText[1], cursorText[0])
+        stdscr.move(cursor_y, cursor_x)
 
         # Refresh the screen
         stdscr.refresh()
+
+        k = stdscr.getch()
 
 def main():
     curses.wrapper(draw)
