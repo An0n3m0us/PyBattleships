@@ -73,7 +73,7 @@ while len(battleships[0]) != 0:
                 for length in range(ship[2]):
                     length = length*direction[1]
                     posRow = list(board[0][row+length])
-                    posRow[column] = "O"
+                    posRow[column] = ship[0]
                     board[0][row+length] = ''.join(posRow)
                 # Remove ship
                 battleships[0].pop(ship[1])
@@ -93,14 +93,11 @@ while len(battleships[0]) != 0:
             if emptyPositions == ship[2]:
                 for length in range(ship[2]):
                     length = length*direction[1]
-                    posColumn[column+length] = "O"
+                    posColumn[column+length] = ship[0]
                     board[0][row] = ''.join(posColumn)
                 # Remove ship
                 battleships[0].pop(ship[1])
                 battleships[1].pop(ship[1])
 
         print(boardDisplay(0))
-
-    else:
-        query = inputCoordinates()
     
