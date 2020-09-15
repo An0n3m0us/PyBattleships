@@ -36,60 +36,70 @@ def inputCoordinates():
 # MAIN CODE
 
 print("\n\nINSTRUCTIONS: Use n, s, e, w to pick direction (e.g: CB3s for Carrier B3 south)\n\n")
-input("")
+#input("") # ENABLE THIS LATER
 print(boardDisplay(0))
-query = inputCoordinates()
 
 # Loop until correct format given
-
 while len(battleships[0]) != 0:
+
+    query = inputCoordinates()
+
     if (len(query) == 4 and query[0].upper() in battleships[0] and query[1].upper() in columns and query[2].isdigit() and query[3].lower() in ["n", "e", "s", "w"]):
         ship = [query[0].upper(), battleships[0].index(query[0].upper())] # Char, index
         ship = [ship[0], ship[1], int(battleships[1][ship[1]][-2])] # Char, index, length
 
-        column = columns[query[1].upper()]
+        column = int(columns[query[1].upper()])
         row = int(query[2])
-        direction = query[3].lower()
+        direction = [query[3].lower(), ""]
 
-        if direction == "n":
+        if direction[0] == "n" or direction[0] == "w":
+            direction[1] = -1
+        elif direction[0] == "s" or direction[0] == "e":
+            direction[1] = 1
 
-            if (row-ship[2]+1) in rows:
-                emptyPositions = 0
+        # Check if ship can be placed based on length
+        if (direction[0] == "n" or direction[0] == "s") and ((row+(ship[2]*direction[1])-direction[1]) in rows):
+            emptyPositions = 0
+
+            # Check if positions are empty
+            for length in range(ship[2]):
+                length = length*direction[1]
+                posRow = list(board[0][row+length])
+                if posRow[column] == "-":
+                    emptyPositions += 1
+
+            # If positions are empty, place ship
+            if emptyPositions == ship[2]:
                 for length in range(ship[2]):
-                    posRow = list(board[0][row-length])
-                    if posRow[column] == "-":
-                        emptyPositions += 1
-
-                if emptyPositions == ship[2]:
-                    for length in range(ship[2]):
-                        posRow = list(board[0][row-length])
-                        posRow[column] = "O"
-                        board[0][row-length] = ''.join(posRow)
-                    # Remove ship
-                    battleships[0].pop(ship[1])
-                    battleships[1].pop(ship[1])
-
-        elif direction == "s":
-            if (row+ship[2]-1) in rows:
-                emptyPositions = 0
-                for length in range(ship[2]):
+                    length = length*direction[1]
                     posRow = list(board[0][row+length])
-                    if posRow[column] == "-":
-                        emptyPositions += 1
-                print(emptyPositions)
+                    posRow[column] = "O"
+                    board[0][row+length] = ''.join(posRow)
+                # Remove ship
+                battleships[0].pop(ship[1])
+                battleships[1].pop(ship[1])
 
-                if emptyPositions == ship[2]:
-                    for length in range(ship[2]):
-                        posRow = list(board[0][row+length])
-                        posRow[column] = "O"
-                        board[0][row+length] = ''.join(posRow)
-                    # Remove ship
-                    battleships[0].pop(ship[1])
-                    battleships[1].pop(ship[1])
+        if (direction[0] == "e" or direction[0] == "w") and ((column+(ship[2]*direction[1])-direction[1]) in columns.values()):
+            emptyPositions = 0
+
+            # Check if positions are empty
+            posColumn = list(board[0][row])
+            for length in range(ship[2]):
+                length = length*direction[1]
+                if posColumn[column+length] == "-":
+                    emptyPositions += 1
+
+            # If positions are empty, place ship
+            if emptyPositions == ship[2]:
+                for length in range(ship[2]):
+                    length = length*direction[1]
+                    posColumn[column+length] = "O"
+                    board[0][row] = ''.join(posColumn)
+                # Remove ship
+                battleships[0].pop(ship[1])
+                battleships[1].pop(ship[1])
 
         print(boardDisplay(0))
-
-        query = inputCoordinates()
 
     else:
         query = inputCoordinates()
