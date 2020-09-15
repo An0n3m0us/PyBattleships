@@ -1,4 +1,4 @@
-import time
+import time, os
 
 board = [["----------", "----------", "----------", "----------", "----------", "----------", "----------", "----------", "----------", "----------"]]
 
@@ -29,18 +29,28 @@ def boardDisplay(playerIndex):
 -------------------------------
     """
 
+def clearOutput():
+    if os.name == 'posix':
+        os.system("clear")
+    elif os.name == 'nt':
+        os.system("cls")
+
 def inputCoordinates():
+    
     print("Battleships: " + ", ".join(battleships[1]))
     return list(input("Coordinates: "))
 
 # MAIN CODE
 
-print("\n\nINSTRUCTIONS: Use n, s, e, w to pick direction (e.g: CB3s for Carrier B3 south)\n\n")
+clearOutput();
+print("\n\nINSTRUCTIONS: Use n, s, e, w to pick direction (e.g: CB3s for Carrier B3 south)")
 #input("") # ENABLE THIS LATER
-print(boardDisplay(0))
 
 # Loop until correct format given
 while len(battleships[0]) != 0:
+
+    clearOutput();
+    print(boardDisplay(0))
 
     query = inputCoordinates()
 
