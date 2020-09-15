@@ -29,40 +29,68 @@ def boardDisplay(playerIndex):
 -------------------------------
     """
 
+def inputCoordinates():
+    print("Battleships: " + ", ".join(battleships[1]))
+    return list(input("Coordinates: "))
+
+# MAIN CODE
+
+print("\n\nINSTRUCTIONS: Use n, s, e, w to pick direction (e.g: CB3s for Carrier B3 south)\n\n")
+input("")
 print(boardDisplay(0))
-
-print("Battleships: " + ", ".join(battleships[1]))
-print("Place a battleship (Use nesw to pick direction (e.g: CB3s))")
-
-query = list(input("Place destroyer: "))
+query = inputCoordinates()
 
 # Loop until correct format given
 
-while not (len(query) == 4 and query[0].upper() in battleships[0] and query[1].upper() in columns and query[2].isdigit() and query[3].lower() in ["n", "e", "s", "w"]):
-    query = list(input("Place destroyer: "))
-else:
-    ship = [query[0].upper(), battleships[0].index(query[0].upper())] # Char, index
-    ship = [ship[0], ship[1], int(battleships[1][ship[1]][-2])] # Char, index, length
+while len(battleships[0]) != 0:
+    if (len(query) == 4 and query[0].upper() in battleships[0] and query[1].upper() in columns and query[2].isdigit() and query[3].lower() in ["n", "e", "s", "w"]):
+        ship = [query[0].upper(), battleships[0].index(query[0].upper())] # Char, index
+        ship = [ship[0], ship[1], int(battleships[1][ship[1]][-2])] # Char, index, length
 
-    column = columns[query[1].upper()]
-    row = int(query[2])
-    direction = query[3].lower()
+        column = columns[query[1].upper()]
+        row = int(query[2])
+        direction = query[3].lower()
 
-    if direction == "n":
-        if (row-ship[2]+1) in rows:
-            for length in range(ship[2]):
-                posRow = list(board[0][row-length])
-                posRow[column] = "O"
-                board[0][row-length] = ''.join(posRow)
-    elif direction == "s":
-        if (row+ship[2]-1) in rows:
-            for length in range(ship[2]):
-                posRow = list(board[0][row+length])
-                posRow[column] = "O"
-                board[0][row+length] = ''.join(posRow)
+        if direction == "n":
 
-    # Remove ship
-    battleships[0].pop(ship[1])
-    battleships[1].pop(ship[1])
+            if (row-ship[2]+1) in rows:
+                emptyPositions = 0
+                for length in range(ship[2]):
+                    posRow = list(board[0][row-length])
+                    if posRow[column] == "-":
+                        emptyPositions += 1
 
-    print(boardDisplay(0))
+                if emptyPositions == ship[2]:
+                    for length in range(ship[2]):
+                        posRow = list(board[0][row-length])
+                        posRow[column] = "O"
+                        board[0][row-length] = ''.join(posRow)
+                    # Remove ship
+                    battleships[0].pop(ship[1])
+                    battleships[1].pop(ship[1])
+
+        elif direction == "s":
+            if (row+ship[2]-1) in rows:
+                emptyPositions = 0
+                for length in range(ship[2]):
+                    posRow = list(board[0][row+length])
+                    if posRow[column] == "-":
+                        emptyPositions += 1
+                print(emptyPositions)
+
+                if emptyPositions == ship[2]:
+                    for length in range(ship[2]):
+                        posRow = list(board[0][row+length])
+                        posRow[column] = "O"
+                        board[0][row+length] = ''.join(posRow)
+                    # Remove ship
+                    battleships[0].pop(ship[1])
+                    battleships[1].pop(ship[1])
+
+        print(boardDisplay(0))
+
+        query = inputCoordinates()
+
+    else:
+        query = inputCoordinates()
+    
