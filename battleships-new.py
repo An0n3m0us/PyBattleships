@@ -60,6 +60,7 @@ def draw(stdscr):
     # Start colors in curses
     curses.start_color()
     curses.init_pair(1, curses.COLOR_GREEN, curses.COLOR_BLACK)
+    curses.init_pair(2, curses.COLOR_BLACK, curses.COLOR_BLACK)
 
     while True:
         # Initialization
@@ -171,18 +172,31 @@ def draw(stdscr):
                             cursor_x = 23+i*2
 
         if cursorText[0] != -1:
+
+            # Disable ship in list
+            stdscr.attron(curses.color_pair(2))
+            stdscr.addstr(6+cursorText[0], 14, battleships[1][cursorText[0]])
+            stdscr.attroff(curses.color_pair(2))
+
             if k == ord('r'):
+                cursor_y = cursor_y + len(battleships[1][cursorText[0]])/2 - cursorText[1] - 2
                 cursorText[2] ^= 1
 
-            minMaxX[0] = 23 - cursorText[1]*2
-            minMaxX[1] = 33 - cursorText[1]*2+(5-len(battleships[1][cursorText[0]]))*2
+            if cursorText[2] == 0:
+                minMaxX[0] = 23 - cursorText[1]*2
+                minMaxX[1] = 33 - cursorText[1]*2+(5-len(battleships[1][cursorText[0]]))*2
+            elif cursorText[2] == 1:
+                minMaxX[0] = 23
+                minMaxX[1] = 41
 
-        # Move cursor
-        if cursorText[2] == 0:
-            stdscr.addstr(cursor_y, cursor_x+(cursorText[1]*2), " ".join(battleships[1][cursorText[0]]))
-        elif cursorText[2] == 1:
-            for i in range(len(battleships[1][cursorText[0]])):
-                stdscr.addstr(cursor_y+i+cursorText[1], cursor_x, battleships[0][cursorText[0]])
+                minMaxY[0] = 6 - cursorText[1]
+                minMaxY[1] = 15 - cursorText[1] - cursorText[0] - len(battleships[1][cursorText[0]])+1
+
+            if cursorText[2] == 0:
+                stdscr.addstr(cursor_y, cursor_x+(cursorText[1]*2), " ".join(battleships[1][cursorText[0]]))
+            elif cursorText[2] == 1:
+                for i in range(len(battleships[1][cursorText[0]])):
+                    stdscr.addstr(cursor_y+i+cursorText[1], cursor_x, battleships[0][cursorText[0]])
 
         # Turn off bold
         stdscr.attroff(curses.A_BOLD)
