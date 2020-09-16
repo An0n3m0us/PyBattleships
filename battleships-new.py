@@ -18,9 +18,6 @@ def draw_board(stdscr, width):
     row2 = "Player  1"[:width-1]
     row3 = "A B C D E F G H I J"[:width-1]
 
-    stdscr.attron(curses.color_pair(1))
-    stdscr.attron(curses.A_BOLD)
-
     stdscr.addstr(1, centerString(width, row1), row1)
     stdscr.addstr(3, centerString(width, row2), row2)
     stdscr.addstr(5, centerString(width, row3), row3)
@@ -90,6 +87,10 @@ def draw(stdscr):
         cursor_y = max(minMaxY[0], cursor_y)
         cursor_y = min(minMaxY[1], cursor_y)
 
+        # Turn on colors and bold
+        stdscr.attron(curses.color_pair(1))
+        stdscr.attron(curses.A_BOLD)
+
         # Draw board
         draw_board(stdscr, width)
         draw_battleshipContainer(stdscr, width)
@@ -154,9 +155,8 @@ def draw(stdscr):
                     battleships[0].pop(ship[1])
                     battleships[1].pop(ship[1])"""
 
-        # Turning off attributes for title
+        # Turn off color
         stdscr.attroff(curses.color_pair(1))
-        stdscr.attroff(curses.A_BOLD)
 
         # Selection
         if k == ord(' '):
@@ -174,15 +174,18 @@ def draw(stdscr):
             if k == ord('r'):
                 cursorText[2] ^= 1
 
-            minMaxX[0] = 23 + (cursorText[1]*2)
-            minMaxX[1] = 41 - (8+cursorText[1]*2)
+            minMaxX[0] = 23 - cursorText[1]*2
+            minMaxX[1] = 33 - cursorText[1]*2+(5-len(battleships[1][cursorText[0]]))*2
 
         # Move cursor
         if cursorText[2] == 0:
             stdscr.addstr(cursor_y, cursor_x+(cursorText[1]*2), " ".join(battleships[1][cursorText[0]]))
         elif cursorText[2] == 1:
             for i in range(len(battleships[1][cursorText[0]])):
-                stdscr.addstr(cursor_y+i+cursorText[1], cursor_x, battleships[0][0])
+                stdscr.addstr(cursor_y+i+cursorText[1], cursor_x, battleships[0][cursorText[0]])
+
+        # Turn off bold
+        stdscr.attroff(curses.A_BOLD)
 
         stdscr.move(cursor_y, cursor_x)
 
