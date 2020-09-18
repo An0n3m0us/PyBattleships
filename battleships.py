@@ -8,35 +8,33 @@ columns = {"A": 0, "B": 1, "C": 2, "D": 3, "E": 4, "F": 5, "G": 6, "H": 7, "I": 
 
 battleships = [["C", "B", "D", "S", "P"], ["CCCCC", "BBBB", "DDD", "SSS", "PP"]]
 
-def draw_board(stdscr, width):
+def draw_board(stdscr, width, xOffset):
+
     curses.noecho()
 
     row1 = "-------------------------------"[:width-1]
     row2 = "Player  1"[:width-1]
     row3 = "A B C D E F G H I J"[:width-1]
 
-    stdscr.addstr(1, 24, row1)
-    stdscr.addstr(3, 35, row2)
-    stdscr.addstr(5, 30, row3)
+    stdscr.addstr(0, 24+xOffset, row1)
+    stdscr.addstr(2, 35+xOffset, row2)
 
+    stdscr.addstr(4, 30+xOffset, row3)
     for i in range(10):
         row4 = "0 " + " ".join(board[0][i]) + " 0"[:width-1]
-        stdscr.addstr(6+i, 28, row4.replace("0", str(i)))
+        stdscr.addstr(5+i, 28+xOffset, row4.replace("0", str(i)))
 
-    stdscr.addstr(16, 30, row3)
-    stdscr.addstr(18, 24, row1)
-
-    stdscr.addstr(20, 0, "({SHIP}{COLUMN}{ROW}{DIRECTION} ( 'CB3s' for Carrier B3 south))")
-    stdscr.addstr(22, 0, "> "[:width-1])
+    stdscr.addstr(15, 30+xOffset, row3)
+    stdscr.addstr(17, 24+xOffset, row1)
 
     curses.echo()
 
-def draw_battleshipContainer(stdscr, width):
+def draw_battleshipContainer(stdscr, width, xOffset):
     curses.noecho()
 
     for i in range(len(battleships[1])):
         row1 = battleships[1][i]
-        stdscr.addstr(6+i, 20, row1)
+        stdscr.addstr(5+i, 20+xOffset, row1)
 
     curses.echo()
 
@@ -49,6 +47,8 @@ def draw(stdscr):
     cursorText = [-1, -1, -1, -1]
     minMaxX = [20, 48]
     minMaxY = [6, 15]
+    xOffset = 0
+    type = ""
 
     # Clear and refresh the screen for a blank canvas
     stdscr.clear()
@@ -64,16 +64,16 @@ def draw(stdscr):
         stdscr.clear()
         height, width = stdscr.getmaxyx()
 
-        if k == curses.KEY_DOWN:
+        if k == ord('s'):
             cursor_y = cursor_y + 1
-        elif k == curses.KEY_UP:
+        elif k == ord('w'):
             cursor_y = cursor_y - 1
-        elif k == curses.KEY_RIGHT:
+        elif k == ord('d'):
             if cursor_x > 23:
                 cursor_x = cursor_x + 2
             else:
                 cursor_x = cursor_x + 1
-        elif k == curses.KEY_LEFT:
+        elif k == ord('a'):
             if cursor_x > 25:
                 cursor_x = cursor_x - 2
             else:
@@ -90,8 +90,11 @@ def draw(stdscr):
         stdscr.attron(curses.A_BOLD)
 
         # Draw board
-        draw_board(stdscr, width)
-        draw_battleshipContainer(stdscr, width)
+        if type == "condensed":
+            xOffset = -20
+
+        draw_board(stdscr, width, xOffset)
+        draw_battleshipContainer(stdscr, width, xOffset)
 
         # Input
         """query = stdscr.getstr(22, 2, 4)
@@ -164,7 +167,7 @@ def draw(stdscr):
                     length = len(battleships[1][yRow])
                     for i in range(length):
                         if cursor_y == 6+yRow and cursor_x == 20+i:
-                            cursorText = [yRow, i, 0]
+                            cursorText = [yRow, cursor_x-20, 0]
                             cursor_y = 6+yRow
                             cursor_x = 30+cursorText[1]*2
 
@@ -180,20 +183,26 @@ def draw(stdscr):
 
             if cursorText[2] == 0:
                 minMaxX[0] = 30+cursorText[1]*2
-                minMaxX[1] = 40+cursorText[1]*2
+                minMaxX[1] = 48-(len(battleships[1][cursorText[0]])*2-cursorText[1]*2)+2
                 minMaxY[0] = 6
                 minMaxY[1] = 15
+
+                """if cursor_x+cursorText[0] < minMaxX[0]:
+                    cursor_x = 30+cursorText[1]*2
+                elif cursor_x+cursorText[0] > minMaxX[1]:
+                    cursor_x = 30+cursorText[1]*2+len(battleships[1][cursorText[0]])*2"""
+
+
                 stdscr.addstr(cursor_y, cursor_x-(cursorText[1]*2), " ".join(battleships[1][cursorText[0]]))
+
             elif cursorText[2] == 1:
                 minMaxX[0] = 30
                 minMaxX[1] = 48
                 minMaxY[0] = 6+cursorText[1]
-                minMaxY[1] = 11+cursorText[1]
+                minMaxY[1] = 19-len(battleships[1][cursorText[0]])-(len(battleships[1][cursorText[0]])-cursorText[1])+2
 
-                if cursor_y < minMaxY[0]+cursorText[0]:
-                    cursor_y = 6+cursorText[1]
-                elif cursor_y > minMaxY[1]+cursorText[0]:
-                    cursor_y = 6+cursorText[1]+len(battleships[1][cursorText[0]])
+                if cursor_y+cursorText[1] > minMaxY[1]:
+                    cursor_y = minMaxY[1]-cursorText[1]
 
                 for i in range(len(battleships[1][cursorText[0]])):
                     stdscr.addstr(cursor_y+i-cursorText[1], cursor_x, battleships[0][cursorText[0]])
