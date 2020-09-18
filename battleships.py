@@ -43,10 +43,10 @@ def draw(stdscr):
 
     k = 0
     cursor_x = 30
-    cursor_y = 6
+    cursor_y = 5
     cursorText = [-1, -1, -1, -1]
     minMaxX = [20, 48]
-    minMaxY = [6, 15]
+    minMaxY = [5, 14]
     xOffset = 0
     type = ""
 
@@ -163,19 +163,19 @@ def draw(stdscr):
         if k == ord(' '):
 
             for yRow in range(5):
-                if cursor_y == 6+yRow and cursor_x >= 20 and cursor_x <= 25:
+                if cursor_y == 5+yRow and cursor_x >= 20 and cursor_x <= 25:
                     length = len(battleships[1][yRow])
                     for i in range(length):
-                        if cursor_y == 6+yRow and cursor_x == 20+i:
+                        if cursor_y == 5+yRow and cursor_x == 20+i:
                             cursorText = [yRow, cursor_x-20, 0]
-                            cursor_y = 6+yRow
+                            cursor_y = 5+yRow
                             cursor_x = 30+cursorText[1]*2
 
         if cursorText[0] != -1:
 
             # Disable ship in list
             stdscr.attron(curses.color_pair(2))
-            stdscr.addstr(6+cursorText[0], 20, battleships[1][cursorText[0]])
+            stdscr.addstr(5+cursorText[0], 20, battleships[1][cursorText[0]])
             stdscr.attroff(curses.color_pair(2))
 
             if k == ord('r'):
@@ -184,8 +184,8 @@ def draw(stdscr):
             if cursorText[2] == 0:
                 minMaxX[0] = 30+cursorText[1]*2
                 minMaxX[1] = 48-(len(battleships[1][cursorText[0]])*2-cursorText[1]*2)+2
-                minMaxY[0] = 6
-                minMaxY[1] = 15
+                minMaxY[0] = 5
+                minMaxY[1] = 14
 
                 """if cursor_x+cursorText[0] < minMaxX[0]:
                     cursor_x = 30+cursorText[1]*2
@@ -198,8 +198,8 @@ def draw(stdscr):
             elif cursorText[2] == 1:
                 minMaxX[0] = 30
                 minMaxX[1] = 48
-                minMaxY[0] = 6+cursorText[1]
-                minMaxY[1] = 19-len(battleships[1][cursorText[0]])-(len(battleships[1][cursorText[0]])-cursorText[1])+2
+                minMaxY[0] = 5+cursorText[1]
+                minMaxY[1] = 18-len(battleships[1][cursorText[0]])-(len(battleships[1][cursorText[0]])-cursorText[1])+2
 
                 if cursor_y+cursorText[1] > minMaxY[1]:
                     cursor_y = minMaxY[1]-cursorText[1]
