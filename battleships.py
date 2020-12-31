@@ -64,16 +64,16 @@ def draw(stdscr):
         stdscr.clear()
         height, width = stdscr.getmaxyx()
 
-        if k == ord('s'):
+        if k == curses.KEY_DOWN:
             cursor_y = cursor_y + 1
-        elif k == ord('w'):
+        elif k == curses.KEY_UP:
             cursor_y = cursor_y - 1
-        elif k == ord('d'):
+        elif k == curses.KEY_RIGHT:
             if cursor_x > 23:
                 cursor_x = cursor_x + 2
             else:
                 cursor_x = cursor_x + 1
-        elif k == ord('a'):
+        elif k == curses.KEY_LEFT:
             if cursor_x > 25:
                 cursor_x = cursor_x - 2
             else:
