@@ -50,8 +50,8 @@ def draw_battleshipContainer(stdscr, width, xOffset):
 def draw(stdscr):
 
     k = 0
-    cursor = {"x": 30, "y": 5}
-    cursorText = ""
+    cursor = {"x": 20, "y": 5}
+    cursorText = {"text": "", "index": -1}
     cursorTextOffset = {"x": 0, "y": 0}
     cursorTextRot = 0
     boundsX = [20, 48]
@@ -87,21 +87,25 @@ def draw(stdscr):
             else:
                 cursor["x"] = cursor["x"] - 1
 
-        if cursorText == "":
+        if cursorText["text"] == "":
             cursor["x"] = min(boundsX[1], cursor["x"])
             cursor["x"] = max(boundsX[0], cursor["x"])
             cursor["y"] = min(boundsY[1], cursor["y"])
             cursor["y"] = max(boundsY[0], cursor["y"])
         else:
+            if k == ord('r'):
+                cursorTextRot ^= 1
+
             if cursorTextRot == 0:
-                cursor["x"] = min(boundsX[1]-(len(cursorText)-cursorTextOffset["x"])+1, cursor["x"])
-                cursor["x"] = max(boundsX[0]+10+cursorTextOffset["x"], cursor["x"])
+                cursor["x"] = min(boundsX[1]-(len(cursorText["text"])-cursorTextOffset["x"])+1, cursor["x"])
+                #cursor["x"] = max(boundsX[0]+10+cursorTextOffset["x"], cursor["x"])
+                cursor["x"] = max(boundsX[0], cursor["x"])
                 cursor["y"] = min(boundsY[1], cursor["y"])
                 cursor["y"] = max(boundsY[0], cursor["y"])
             else:
                 cursor["x"] = min(boundsX[1], cursor["x"])
                 cursor["x"] = max(boundsX[0]+10, cursor["x"])
-                cursor["y"] = min(boundsY[1]-(len(cursorText.replace(" ", ""))-cursorTextOffset["y"])+1, cursor["y"])
+                cursor["y"] = min(boundsY[1]-(len(cursorText["text"].replace(" ", ""))-cursorTextOffset["y"])+1, cursor["y"])
                 cursor["y"] = max(boundsY[0]+cursorTextOffset["y"], cursor["y"])
 
         # Turn on colors and bold
@@ -126,43 +130,37 @@ def draw(stdscr):
 
         # Selection
         if k == ord(' '):
-            # Debug
-            stdscr.addstr(0, 0, str(cursor["x"]) + "," + str(cursor["y"]))
-
             # Select based of a -5 offset
             listIndex = cursor["y"]-5
-            selectedShip = battleships[1][listIndex]
-            if cursor["x"] >= xOffset and cursor["x"] < xOffset+len(selectedShip):
-                cursorText = str(" ".join(list(selectedShip)))
-                cursorTextOffset["x"] = (cursor["x"]-xOffset)*2
-                cursorTextOffset["y"] = (cursor["x"]-xOffset)
-                cursor["y"] = cursor["y"]
-                cursor["x"] = 30+cursorTextOffset["x"]
-                battleshipStatus[listIndex] = "S"
-                draw_battleshipContainer(stdscr, width, xOffset)
-
-        # Handle rotation
-        if cursorText != "" and k == ord('r'):
-            cursorTextRot ^= 1
-            # Duplicate code
-            if cursorTextRot == 0:
-                cursor["x"] = min(boundsX[1]-(len(cursorText)-cursorTextOffset["x"])+1, cursor["x"])
-                cursor["x"] = max(boundsX[0]+10+cursorTextOffset["x"], cursor["x"])
-                cursor["y"] = min(boundsY[1], cursor["y"])
-                cursor["y"] = max(boundsY[0], cursor["y"])
-            else:
-                cursor["x"] = min(boundsX[1], cursor["x"])
-                cursor["x"] = max(boundsX[0]+10, cursor["x"])
-                cursor["y"] = min(boundsY[1]-(len(cursorText.replace(" ", ""))-cursorTextOffset["y"])+1, cursor["y"])
-                cursor["y"] = max(boundsY[0]+cursorTextOffset["y"], cursor["y"])
-
+            if len(battleships[1]) > listIndex:
+                selectedShip = battleships[1][listIndex]
+                if cursor["x"] >= xOffset and cursor["x"] < xOffset+len(selectedShip):
+                    cursorText["text"] = str(" ".join(list(selectedShip)))
+                    cursorText["index"] = listIndex
+                    cursorTextOffset["x"] = (cursor["x"]-xOffset)*2
+                    cursorTextOffset["y"] = (cursor["x"]-xOffset)
+                    cursor["y"] = cursor["y"]
+                    cursor["x"] = 30+cursorTextOffset["x"]
+                    battleshipStatus[listIndex] = "S"
+                    draw_battleshipContainer(stdscr, width, xOffset)
 
         # Draw ship on board
-        if cursorTextRot == 0:
-            stdscr.addstr(cursor["y"], cursor["x"]-cursorTextOffset["x"], cursorText)
-        else:
-            for i in range(len(cursorText.replace(" ", ""))):
-                stdscr.addstr(cursor["y"]-cursorTextOffset["y"]+i, cursor["x"], cursorText[0])
+        if cursorText["text"] != "":
+            if cursor["x"] > boundsX[0]+8:
+                if cursorTextRot == 0:
+                    stdscr.addstr(cursor["y"], cursor["x"]-cursorTextOffset["x"], cursorText["text"])
+                else:
+                    for i in range(len(cursorText["text"].replace(" ", ""))):
+                        stdscr.addstr(cursor["y"]-cursorTextOffset["y"]+i, cursor["x"], cursorText["text"][0])
+            else:
+                # Deselection
+                cursorText["text"] = ""
+                battleshipStatus[cursorText["index"]] = ""
+                cursor["x"] = 20
+                cursor["y"] = 5
+                cursorText["index"] = -1
+                cursorTextRot = 0
+                draw_battleshipContainer(stdscr, width, xOffset)
 
 
         """if cursorText[0] != -1:
