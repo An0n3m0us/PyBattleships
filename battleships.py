@@ -66,6 +66,7 @@ def draw(stdscr):
     curses.start_color()
     curses.init_pair(1, curses.COLOR_GREEN, curses.COLOR_BLACK)
     curses.init_pair(2, curses.COLOR_BLACK, curses.COLOR_BLACK)
+    curses.init_pair(3, curses.COLOR_RED, curses.COLOR_BLACK)
 
     while True:
         # Initialization
@@ -103,7 +104,7 @@ def draw(stdscr):
                 cursor["y"] = max(boundsY[0], cursor["y"])
             else:
                 cursor["x"] = min(boundsX[1], cursor["x"])
-                cursor["x"] = max(boundsX[0]+10, cursor["x"])
+                cursor["x"] = max(boundsX[0], cursor["x"])
                 cursor["y"] = min(boundsY[1]-(len(cursorText["text"])-cursorTextOffset)+1, cursor["y"])
                 cursor["y"] = max(boundsY[0]+cursorTextOffset, cursor["y"])
 
@@ -145,11 +146,25 @@ def draw(stdscr):
         # Draw ship on board
         if cursorText["text"] != "":
             if cursor["x"] > boundsX[0]+8:
+
                 if cursorTextRot == 0:
+                    # Invalid placement
+                    if cursor["x"] < boundsX[0]+10+(cursorTextOffset*2):
+                        stdscr.attron(curses.color_pair(3))
+                    else:
+                        stdscr.attroff(curses.color_pair(3))
+
                     stdscr.addstr(cursor["y"], cursor["x"]-(cursorTextOffset*2), str(" ".join(list(cursorText["text"]))))
                 else:
+                    # Invalid placement
+                    if cursor["x"] < boundsX[0]+10:
+                        stdscr.attron(curses.color_pair(3))
+                    else:
+                        stdscr.attroff(curses.color_pair(3))
+
                     for i in range(len(cursorText["text"])):
                         stdscr.addstr(cursor["y"]-cursorTextOffset+i, cursor["x"], cursorText["text"][0])
+
             else:
                 # Deselection
                 cursorText["text"] = ""
