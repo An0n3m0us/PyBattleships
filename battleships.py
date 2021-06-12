@@ -7,6 +7,7 @@ rows = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 columns = {"A": 0, "B": 1, "C": 2, "D": 3, "E": 4, "F": 5, "G": 6, "H": 7, "I": 8, "J": 9}
 
 battleships = [["C", "B", "D", "S", "P"], ["CCCCC", "BBBB", "DDD", "SSS", "PP"]]
+battleshipStatus = ["", "", "", "", ""];
 
 def draw_board(stdscr, width, xOffset):
 
@@ -34,7 +35,14 @@ def draw_battleshipContainer(stdscr, width, xOffset):
 
     for i in range(len(battleships[1])):
         row1 = battleships[1][i]
-        stdscr.addstr(5+i, xOffset, row1)
+        if battleshipStatus[i] == "S":
+            stdscr.attron(curses.color_pair(2))
+            stdscr.addstr(5+i, xOffset, row1)
+            stdscr.attroff(curses.color_pair(2))
+        else:
+            stdscr.attron(curses.color_pair(1))
+            stdscr.addstr(5+i, xOffset, row1)
+            stdscr.attroff(curses.color_pair(1))
 
     curses.echo()
 
@@ -49,7 +57,6 @@ def draw(stdscr):
     boundsX = [20, 48]
     boundsY = [5, 14]
     xOffset = 20
-    type = ""
 
     # Clear and refresh the screen for a blank canvas
     stdscr.clear()
@@ -108,68 +115,14 @@ def draw(stdscr):
         draw_board(stdscr, width, xOffset)
         draw_battleshipContainer(stdscr, width, xOffset)
 
-        # Input
-        """query = stdscr.getstr(22, 2, 4)
-        query = list(str(query)[2:-1])
-
-        if (len(query) == 4 and query[0].upper() in battleships[0] and query[1].upper() in columns and query[2].isdigit() and query[3].lower() in ["n", "e", "s", "w"]):
-            ship = [query[0].upper(), battleships[0].index(query[0].upper())] # Char, index
-            ship = [ship[0], ship[1], int(battleships[1][ship[1]][-2])] # Char, index, length
-
-            column = int(columns[query[1].upper()])
-            row = int(query[2])
-            direction = [query[3].lower(), ""]
-
-            # Check directions
-            if direction[0] == "n" or direction[0] == "w":
-                direction[1] = -1
-            elif direction[0] == "s" or direction[0] == "e":
-                direction[1] = 1
-
-            # Check if ship can be placed based on length
-            if (direction[0] == "n" or direction[0] == "s") and ((row+(ship[2]*direction[1])-direction[1]) in rows):
-                emptyPositions = 0
-
-                # Check if positions are empty
-                for length in range(ship[2]):
-                    length = length*direction[1]
-                    posRow = list(board[0][row+length])
-                    if posRow[column] == "-":
-                        emptyPositions += 1
-
-                # If positions are empty, place ship
-                if emptyPositions == ship[2]:
-                    for length in range(ship[2]):
-                        length = length*direction[1]
-                        posRow = list(board[0][row+length])
-                        posRow[column] = ship[0]
-                        board[0][row+length] = ''.join(posRow)
-                    # Remove ship
-                    battleships[0].pop(ship[1])
-                    battleships[1].pop(ship[1])
-
-            if (direction[0] == "e" or direction[0] == "w") and ((column+(ship[2]*direction[1])-direction[1]) in columns.values()):
-                emptyPositions = 0
-
-                # Check if positions are empty
-                posColumn = list(board[0][row])
-                for length in range(ship[2]):
-                    length = length*direction[1]
-                    if posColumn[column+length] == "-":
-                        emptyPositions += 1
-
-                # If positions are empty, place ship
-                if emptyPositions == ship[2]:
-                    for length in range(ship[2]):
-                        length = length*direction[1]
-                        posColumn[column+length] = ship[0]
-                        board[0][row] = ''.join(posColumn)
-                    # Remove ship
-                    battleships[0].pop(ship[1])
-                    battleships[1].pop(ship[1])"""
-
         # Turn off color
         stdscr.attroff(curses.color_pair(1))
+
+
+
+
+
+
 
         # Selection
         if k == ord(' '):
@@ -177,17 +130,32 @@ def draw(stdscr):
             stdscr.addstr(0, 0, str(cursor["x"]) + "," + str(cursor["y"]))
 
             # Select based of a -5 offset
-            selectedShip = battleships[1][cursor["y"]-5]
+            listIndex = cursor["y"]-5
+            selectedShip = battleships[1][listIndex]
             if cursor["x"] >= xOffset and cursor["x"] < xOffset+len(selectedShip):
                 cursorText = str(" ".join(list(selectedShip)))
                 cursorTextOffset["x"] = (cursor["x"]-xOffset)*2
                 cursorTextOffset["y"] = (cursor["x"]-xOffset)
                 cursor["y"] = cursor["y"]
                 cursor["x"] = 30+cursorTextOffset["x"]
+                battleshipStatus[listIndex] = "S"
+                draw_battleshipContainer(stdscr, width, xOffset)
 
         # Handle rotation
         if cursorText != "" and k == ord('r'):
             cursorTextRot ^= 1
+            # Duplicate code
+            if cursorTextRot == 0:
+                cursor["x"] = min(boundsX[1]-(len(cursorText)-cursorTextOffset["x"])+1, cursor["x"])
+                cursor["x"] = max(boundsX[0]+10+cursorTextOffset["x"], cursor["x"])
+                cursor["y"] = min(boundsY[1], cursor["y"])
+                cursor["y"] = max(boundsY[0], cursor["y"])
+            else:
+                cursor["x"] = min(boundsX[1], cursor["x"])
+                cursor["x"] = max(boundsX[0]+10, cursor["x"])
+                cursor["y"] = min(boundsY[1]-(len(cursorText.replace(" ", ""))-cursorTextOffset["y"])+1, cursor["y"])
+                cursor["y"] = max(boundsY[0]+cursorTextOffset["y"], cursor["y"])
+
 
         # Draw ship on board
         if cursorTextRot == 0:
